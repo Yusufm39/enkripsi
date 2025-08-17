@@ -60,8 +60,8 @@
 
         <div class="cols" style="margin-top:10px">
           <div>
-            <label for="pass">Passphrase (Master)</label>
-            <input id="pass" type="password" placeholder="(contoh: MasterKeyRahasia!)" />
+            <label for="pass">Passphrase</label>
+            <input id="pass" type="password" placeholder="(contoh: Rahasia!)" />
             <div class="hint">Passphrase digunakan untuk menurunkan kunci (PBKDF2). Simpan passphrase dengan aman.</div>
           </div>
           <div>
@@ -269,7 +269,7 @@
 
   exampleBtn.addEventListener('click', ()=>{
     plainEl.value = "Admin123!";
-    passEl.value = "MasterKeyRahasia!";
+    passEl.value = "Rahasia!";
   });
 
   clearBtn.addEventListener('click', ()=>{
