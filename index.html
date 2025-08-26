@@ -130,9 +130,30 @@
     }
 
     function clearOutput() {
-      document.getElementById("output").value = "";
-      lastEncrypted = "";
-    }
+    if (!confirm("Apakah yakin ingin menghapus semua data?")) return;
+
+    // Reset semua input ENKRIPSI
+    document.getElementById("service").value = "";
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("passphrase").value = "";
+    document.getElementById("iterations").value = "200000"; // default lagi
+
+    // Reset output enkripsi
+    document.getElementById("output").value = "";
+    if (typeof lastEncrypted !== "undefined") lastEncrypted = "";
+
+    // Reset semua input DEKRIPSI
+    document.getElementById("fileInput").value = "";
+    document.getElementById("decryptPassphrase").value = "";
+    document.getElementById("manualInput").value = "";
+    document.getElementById("manualPassphrase").value = "";
+    document.getElementById("decryptedOutput").textContent = "";
+
+    // Fokus kembali ke input pertama
+    document.getElementById("service").focus();
+  }
 
     async function decryptDataFromFile() {
       let file = document.getElementById("fileInput").files[0];
