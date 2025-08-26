@@ -93,7 +93,7 @@
       let iterations = parseInt(document.getElementById("iterations").value);
 
       if (!freeText || !passphrase) {
-        Swal.fire("⚠️ Data belum lengkap", "Isi teks dan passphrase!", "warning");
+        Swal.fire("Data belum lengkap", "Isi teks dan passphrase!", "warning");
         return;
       }
 
@@ -117,27 +117,27 @@
       lastEncrypted = base64;
       document.getElementById("output").value = base64;
 
-      Swal.fire("✅ Berhasil", "Data berhasil dienkripsi!", "success");
+      Swal.fire("Berhasil", "Data berhasil dienkripsi!", "success");
     }
 
     function downloadEncrypted() {
       if (!lastEncrypted) {
-        Swal.fire("⚠️ Tidak ada data", "Enkripsi dulu sebelum download!", "warning");
+        Swal.fire("Tidak ada data", "Enkripsi dulu sebelum download!", "warning");
         return;
       }
       download("enkripsidata.txt", lastEncrypted);
-      Swal.fire("📥 Tersimpan", "File berhasil diunduh!", "success");
+      Swal.fire("Tersimpan", "File berhasil diunduh!", "success");
     }
 
     function copyOutput() {
       let output = document.getElementById("output");
       if (!output.value) {
-        Swal.fire("⚠️ Kosong", "Tidak ada data untuk disalin!", "warning");
+        Swal.fire("Kosong", "Tidak ada data untuk disalin!", "warning");
         return;
       }
       output.select();
       document.execCommand("copy");
-      Swal.fire("📋 Disalin", "Teks berhasil disalin ke clipboard!", "success");
+      Swal.fire("Disalin", "Teks berhasil disalin ke clipboard!", "success");
     }
 
     function clearOutput() {
@@ -175,7 +175,7 @@
       let file = document.getElementById("fileInput").files[0];
       let passphrase = document.getElementById("decryptPassphrase").value;
       if (!file) {
-        Swal.fire("⚠️ Pilih File", "Pilih file terenkripsi terlebih dahulu!", "warning");
+        Swal.fire("Pilih File", "Pilih file terenkripsi terlebih dahulu!", "warning");
         return;
       }
       let text = await file.text();
@@ -186,7 +186,7 @@
       let text = document.getElementById("manualInput").value;
       let passphrase = document.getElementById("manualPassphrase").value;
       if (!text) {
-        Swal.fire("⚠️ Kosong", "Masukkan teks terenkripsi dulu!", "warning");
+        Swal.fire("Kosong", "Masukkan teks terenkripsi dulu!", "warning");
         return;
       }
       decryptProcess(text, passphrase);
@@ -206,9 +206,9 @@
         let dec = new TextDecoder().decode(decrypted);
         document.getElementById("decryptedOutput").textContent = dec;
 
-        Swal.fire("✅ Berhasil", "Data berhasil didekripsi!", "success");
+        Swal.fire("Berhasil", "Data berhasil didekripsi!", "success");
       } catch (e) {
-        Swal.fire("❌ Gagal", "Passphrase salah atau data rusak!", "error");
+        Swal.fire("Gagal", "Passphrase salah atau data rusak!", "error");
       }
     }
   </script>
