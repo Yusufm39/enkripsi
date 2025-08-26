@@ -13,13 +13,10 @@
   <div class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- ENKRIPSI -->
     <div>
-      <h1 class="text-2xl font-bold mb-4 text-center">🔐 Enkripsi Data Akun</h1>
+      <h1 class="text-2xl font-bold mb-4 text-center">🔐 Enkripsi Data</h1>
 
       <div class="space-y-3">
-        <input id="service" type="text" placeholder="Nama Layanan (contoh: Gmail)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
-        <input id="username" type="text" placeholder="Username / Email" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
-        <input id="password" type="text" placeholder="Password" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
-        <textarea id="notes" placeholder="Catatan tambahan..." class="w-full p-2 rounded bg-gray-700 border border-gray-600"></textarea>
+        <textarea id="freeText" placeholder="Tulis teks bebas di sini..." class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32"></textarea>
 
         <input id="passphrase" type="password" placeholder="Passphrase (kunci enkripsi)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
         <input id="iterations" type="number" value="200000" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
@@ -91,19 +88,16 @@
     let lastEncrypted = "";
 
     async function encryptData() {
-      let service = document.getElementById("service").value;
-      let username = document.getElementById("username").value;
-      let password = document.getElementById("password").value;
-      let notes = document.getElementById("notes").value;
+      let freeText = document.getElementById("freeText").value;
       let passphrase = document.getElementById("passphrase").value;
       let iterations = parseInt(document.getElementById("iterations").value);
 
-      if (!service || !username || !password || !passphrase) {
-        Swal.fire("⚠️ Data belum lengkap", "Isi semua field wajib!", "warning");
+      if (!freeText || !passphrase) {
+        Swal.fire("⚠️ Data belum lengkap", "Isi teks dan passphrase!", "warning");
         return;
       }
 
-      let data = JSON.stringify({ service, username, password, notes });
+      let data = freeText;
       let enc = new TextEncoder();
       let encoded = enc.encode(data);
       let salt = crypto.getRandomValues(new Uint8Array(16));
@@ -158,10 +152,7 @@
       }).then((result) => {
         if (result.isConfirmed) {
           // Reset ENKRIPSI
-          document.getElementById("service").value = "";
-          document.getElementById("username").value = "";
-          document.getElementById("password").value = "";
-          document.getElementById("notes").value = "";
+          document.getElementById("freeText").value = "";
           document.getElementById("passphrase").value = "";
           document.getElementById("iterations").value = "200000";
           document.getElementById("output").value = "";
@@ -174,7 +165,7 @@
           document.getElementById("manualPassphrase").value = "";
           document.getElementById("decryptedOutput").textContent = "";
 
-          document.getElementById("service").focus();
+          document.getElementById("freeText").focus();
           Swal.fire("🧹 Bersih", "Semua data berhasil dihapus!", "success");
         }
       });
