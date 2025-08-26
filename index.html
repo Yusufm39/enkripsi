@@ -1,289 +1,123 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Encryptor</title>
-<meta name="description" content="Encrypt / Decrypt AES-256-GCM menggunakan Passphrase (PBKDF2) — berjalan penuh di browser" />
-<style>
-  :root{
-    --bg:#0b1220; --card:#0f1724; --muted:#98a0b0; --text:#e6eef8;
-    --accent:#3ea7ff; --accent-2:#7fc2ff; --radius:12px; --glass: rgba(255,255,255,0.03);
-  }
-  @media (prefers-color-scheme: light){
-    :root{
-      --bg:#f4f7fb; --card:#ffffff; --muted:#657082; --text:#0b1726;
-      --accent:#1f6be6; --accent-2:#4f8fff; --glass: rgba(0,0,0,0.03);
-    }
-  }
-  *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;background:linear-gradient(180deg, rgba(63,138,255,0.04), transparent),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;padding:18px;display:flex;align-items:center;justify-content:center}
-  .wrap{width:100%;max-width:1100px}
-  header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-  .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,var(--accent),var(--accent-2))}
-  h1{font-size:18px;margin:0}
-  .tag{color:var(--muted);font-size:13px}
-  .card{background:var(--card);border-radius:var(--radius);padding:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-  .grid{display:grid;gap:12px}
-  @media(min-width:980px){ .grid{grid-template-columns:1fr 1fr} }
-  label{font-weight:600;font-size:13px;color:var(--text);margin-bottom:6px;display:block}
-  textarea,input,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:var(--text);font-size:14px;outline:none}
-  textarea{min-height:120px;resize:vertical}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  button{padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
-  .btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent-2));color:#fff}
-  .btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.04)}
-  .controls{display:flex;gap:8px;flex-wrap:wrap}
-  .foot{margin-top:10px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-  .small{font-size:13px;color:var(--muted)}
-  .hint{font-size:13px;color:var(--muted);margin-top:6px}
-  .cols{display:grid;gap:12px}
-  @media(min-width:980px){ .cols{grid-template-columns:1fr 1fr} }
-  .meta{font-size:13px;color:var(--muted);word-break:break-word}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enkripsi Data Akun</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<div class="wrap">
-  <header>
-    <div class="logo" aria-hidden="true"></div>
-    <div>
-      <h1>AES-256 GCM Encryptor</h1>
-      <div class="tag">Encrypt / Decrypt langsung di browser — passphrase + PBKDF2 → AES-GCM</div>
-    </div>
-  </header>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-5">
 
-  <div class="card">
-    <div class="grid">
-      <div>
-        <label for="plaintext">Plaintext / Input</label>
-        <textarea id="plaintext" placeholder="Tulis teks yang ingin dienkripsi, atau paste Base64 untuk didekripsi..."></textarea>
+  <div class="w-full max-w-3xl bg-gray-800 rounded-2xl shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">🔐 Enkripsi Data Akun</h1>
 
-        <div class="cols" style="margin-top:10px">
-          <div>
-            <label for="pass">Passphrase</label>
-            <input id="pass" type="password" placeholder="(contoh: Rahasia!)" />
-            <div class="hint">Passphrase digunakan untuk menurunkan kunci (PBKDF2). Simpan passphrase dengan aman.</div>
-          </div>
-          <div>
-            <label for="iterations">Iterasi PBKDF2</label>
-            <input id="iterations" type="number" min="1000" value="200000" />
-            <div class="hint">Lebih tinggi = lebih aman tapi lebih lambat. Nilai rekomendasi: ≥100000</div>
-          </div>
-        </div>
+    <!-- FORM INPUT -->
+    <div class="space-y-3">
+      <input id="service" type="text" placeholder="Nama Layanan (contoh: Gmail)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+      <input id="username" type="text" placeholder="Username / Email" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+      <input id="password" type="text" placeholder="Password" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+      <textarea id="notes" placeholder="Catatan tambahan..." class="w-full p-2 rounded bg-gray-700 border border-gray-600"></textarea>
 
-        <div style="margin-top:12px" class="controls">
-          <button class="btn-primary" id="encryptBtn">Encrypt (AES-256 GCM)</button>
-          <button class="btn-ghost" id="decryptBtn">Decrypt (Base64 → Plain)</button>
-          <button class="btn-ghost" id="example">Isi contoh (Admin123!)</button>
-          <button class="btn-ghost" id="clearAll">Clear</button>
-        </div>
+      <input id="passphrase" type="password" placeholder="Passphrase (kunci enkripsi)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+      <input id="iterations" type="number" value="200000" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
 
-        <div class="hint" style="margin-top:10px">
-          Format output enkripsi: <code>Base64(salt|iv|ciphertext)</code> — salt 16 bytes, iv 12 bytes, ciphertext berisi tag. Simpan Base64 hasil enkripsi untuk dekripsi nanti.
-        </div>
-      </div>
-
-      <div>
-        <label for="result">Output (Base64 / Plaintext)</label>
-        <textarea id="result" readonly placeholder="Hasil enkripsi (Base64) atau hasil dekripsi akan muncul di sini..."></textarea>
-
-        <div style="margin-top:10px" class="row">
-          <button class="btn-primary" id="copyBtn">Copy</button>
-          <button class="btn-ghost" id="downloadBtn">Download .txt</button>
-        </div>
-
-        <div style="margin-top:12px" class="meta">
-          <div><strong>Info:</strong></div>
-          <div id="metaSalt" class="small">Salt: -</div>
-          <div id="metaIv" class="small">IV: -</div>
-          <div id="metaLen" class="small">Ciphertext length: -</div>
-        </div>
-      </div>
+      <button onclick="encryptData()" class="bg-blue-500 hover:bg-blue-600 w-full p-2 rounded font-bold">Enkripsi & Download</button>
     </div>
 
-    <div class="foot" style="margin-top:12px">
-      <div class="small">Catatan: Proses berjalan lokal di browser — data tidak dikirim ke server.</div>
-      <div class="small">© <span id="year"></span> — Created by M. Yusuf Purnomo</div>
+    <!-- HASIL ENKRIPSI -->
+    <div class="mt-5">
+      <h2 class="text-lg font-semibold">Hasil Enkripsi</h2>
+      <textarea id="output" class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32"></textarea>
+    </div>
+
+    <!-- DEKRIPSI -->
+    <div class="mt-6 border-t border-gray-600 pt-4">
+      <h2 class="text-lg font-semibold mb-2">🔓 Dekripsi dari File</h2>
+      <input type="file" id="fileInput" class="mb-2" />
+      <input id="decryptPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2" />
+      <button onclick="decryptData()" class="bg-green-500 hover:bg-green-600 w-full p-2 rounded font-bold">Dekripsi</button>
+
+      <pre id="decryptedOutput" class="mt-3 bg-gray-700 p-3 rounded"></pre>
     </div>
   </div>
-</div>
 
-<script>
-  // Helper: Convert between Uint8Array and Base64
-  const toBase64 = (u8) => {
-    let bin = '';
-    for (let i=0;i<u8.length;i++) bin += String.fromCharCode(u8[i]);
-    return btoa(bin);
-  };
-  const fromBase64 = (b64) => {
-    const bin = atob(b64);
-    const u8 = new Uint8Array(bin.length);
-    for (let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
-    return u8;
-  };
-
-  // KDF: PBKDF2 derive AES-GCM key (256 bit)
-  async function deriveKey(password, salt, iterations=200000){
-    const encoder = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey(
-      "raw",
-      encoder.encode(password),
-      { name: "PBKDF2" },
-      false,
-      ["deriveKey"]
-    );
-    const key = await crypto.subtle.deriveKey(
-      { name: "PBKDF2", salt, iterations: iterations, hash: "SHA-256" },
-      baseKey,
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["encrypt", "decrypt"]
-    );
-    return key;
-  }
-
-  // Encrypt: produce Base64(salt|iv|ciphertext)
-  async function encryptAesGcm(plaintext, password, iterations=200000){
-    const encoder = new TextEncoder();
-    const salt = crypto.getRandomValues(new Uint8Array(16)); // 16 bytes salt
-    const iv = crypto.getRandomValues(new Uint8Array(12));   // 12 bytes iv (recommended for GCM)
-    const key = await deriveKey(password, salt, iterations);
-    const cipherBuf = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      encoder.encode(plaintext)
-    );
-    const cipherU8 = new Uint8Array(cipherBuf); // includes auth tag at end
-    // bundle: salt + iv + ciphertext
-    const bundle = new Uint8Array(salt.length + iv.length + cipherU8.length);
-    bundle.set(salt, 0);
-    bundle.set(iv, salt.length);
-    bundle.set(cipherU8, salt.length + iv.length);
-    return { b64: toBase64(bundle), salt, iv, cipherLen: cipherU8.length };
-  }
-
-  // Decrypt: accepts Base64(salt|iv|ciphertext) and password
-  async function decryptAesGcm(b64bundle, password, iterations=200000){
-    const decoder = new TextDecoder();
-    const bundle = fromBase64(b64bundle);
-    if (bundle.length < 16+12+16) throw new Error("Bundle terlalu pendek / rusak");
-    const salt = bundle.slice(0,16);
-    const iv = bundle.slice(16, 28);
-    const ciphertext = bundle.slice(28);
-    const key = await deriveKey(password, salt, iterations);
-    const plainBuf = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      ciphertext
-    );
-    return { plaintext: decoder.decode(plainBuf), salt, iv, cipherLen: ciphertext.length };
-  }
-
-  // UI bindings
-  const plainEl = document.getElementById('plaintext');
-  const passEl = document.getElementById('pass');
-  const iterEl = document.getElementById('iterations');
-  const resultEl = document.getElementById('result');
-  const encryptBtn = document.getElementById('encryptBtn');
-  const decryptBtn = document.getElementById('decryptBtn');
-  const copyBtn = document.getElementById('copyBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
-  const exampleBtn = document.getElementById('example');
-  const clearBtn = document.getElementById('clearAll');
-  const metaSalt = document.getElementById('metaSalt');
-  const metaIv = document.getElementById('metaIv');
-  const metaLen = document.getElementById('metaLen');
-  document.getElementById('year').textContent = new Date().getFullYear();
-
-  function setMeta(salt, iv, cipherLen){
-    if(!salt){ metaSalt.textContent = "Salt: -"; metaIv.textContent = "IV: -"; metaLen.textContent = "Ciphertext length: -"; return; }
-    metaSalt.textContent = "Salt (hex): " + Array.from(salt).map(b=>b.toString(16).padStart(2,'0')).join('');
-    metaIv.textContent = "IV (hex): " + Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('');
-    metaLen.textContent = "Ciphertext length (bytes): " + cipherLen;
-  }
-
-  encryptBtn.addEventListener('click', async ()=>{
-    const text = plainEl.value;
-    const pass = passEl.value;
-    const iterations = Number(iterEl.value) || 200000;
-    if(!text){ alert("Masukkan plaintext untuk dienkripsi."); plainEl.focus(); return; }
-    if(!pass){ alert("Masukkan passphrase untuk enkripsi."); passEl.focus(); return; }
-    try{
-      encryptBtn.disabled = true;
-      encryptBtn.textContent = "Encrypting…";
-      const { b64, salt, iv, cipherLen } = await encryptAesGcm(text, pass, iterations);
-      resultEl.value = b64;
-      setMeta(salt, iv, cipherLen);
-    }catch(e){
-      alert("Gagal enkripsi: " + (e.message||e));
-      setMeta();
-    }finally{
-      encryptBtn.disabled = false;
-      encryptBtn.textContent = "Encrypt (AES-256 GCM)";
+  <script>
+    async function getKeyMaterial(passphrase) {
+      let enc = new TextEncoder();
+      return crypto.subtle.importKey("raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]);
     }
-  });
 
-  decryptBtn.addEventListener('click', async ()=>{
-    const b64 = plainEl.value.trim();
-    const pass = passEl.value;
-    const iterations = Number(iterEl.value) || 200000;
-    if(!b64){ alert("Masukkan Base64 bundle (salt|iv|ciphertext) di field Input untuk dekripsi."); plainEl.focus(); return; }
-    if(!pass){ alert("Masukkan passphrase untuk dekripsi."); passEl.focus(); return; }
-    try{
-      decryptBtn.disabled = true;
-      decryptBtn.textContent = "Decrypting…";
-      const { plaintext, salt, iv, cipherLen } = await decryptAesGcm(b64, pass, iterations);
-      resultEl.value = plaintext;
-      setMeta(salt, iv, cipherLen);
-    }catch(e){
-      alert("Gagal dekripsi: " + (e.message||e));
-      setMeta();
-    }finally{
-      decryptBtn.disabled = false;
-      decryptBtn.textContent = "Decrypt (Base64 → Plain)";
+    async function getKey(keyMaterial, salt, iterations) {
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
     }
-  });
 
-  copyBtn.addEventListener('click', async ()=>{
-    if(!resultEl.value){ alert("Tidak ada hasil untuk disalin."); return; }
-    try{
-      await navigator.clipboard.writeText(resultEl.value);
-      alert("Disalin ke clipboard.");
-    }catch{
-      alert("Gagal menyalin ke clipboard.");
+    function download(filename, text) {
+      let blob = new Blob([text], { type: "text/plain" });
+      let link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
     }
-  });
 
-  downloadBtn.addEventListener('click', ()=>{
-    if(!resultEl.value){ alert("Tidak ada hasil untuk diunduh."); return; }
-    const blob = new Blob([resultEl.value], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "hasil.txt";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  });
+    async function encryptData() {
+      let service = document.getElementById("service").value;
+      let username = document.getElementById("username").value;
+      let password = document.getElementById("password").value;
+      let notes = document.getElementById("notes").value;
+      let passphrase = document.getElementById("passphrase").value;
+      let iterations = parseInt(document.getElementById("iterations").value);
 
-  exampleBtn.addEventListener('click', ()=>{
-    plainEl.value = "Admin123!";
-    passEl.value = "Rahasia!";
-  });
+      let data = JSON.stringify({ service, username, password, notes });
 
-  clearBtn.addEventListener('click', ()=>{
-    plainEl.value = ""; resultEl.value = ""; passEl.value = ""; setMeta();
-  });
+      let enc = new TextEncoder();
+      let encoded = enc.encode(data);
+      let salt = crypto.getRandomValues(new Uint8Array(16));
+      let iv = crypto.getRandomValues(new Uint8Array(12));
 
-  // keyboard shortcuts
-  document.addEventListener('keydown', (e)=>{
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='e'){ e.preventDefault(); encryptBtn.click(); }
-    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='d'){ e.preventDefault(); decryptBtn.click(); }
-  });
+      let keyMaterial = await getKeyMaterial(passphrase);
+      let key = await getKey(keyMaterial, salt, iterations);
+      let ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
 
-  // initialize meta
-  setMeta();
-</script>
+      let buff = new Uint8Array(ciphertext);
+      let merged = new Uint8Array(salt.length + iv.length + buff.length);
+      merged.set(salt, 0);
+      merged.set(iv, salt.length);
+      merged.set(buff, salt.length + iv.length);
+
+      let base64 = btoa(String.fromCharCode(...merged));
+      document.getElementById("output").value = base64;
+      download(service + "_akun.txt", base64);
+    }
+
+    async function decryptData() {
+      let file = document.getElementById("fileInput").files[0];
+      let passphrase = document.getElementById("decryptPassphrase").value;
+      if (!file) return alert("Pilih file terenkripsi dulu!");
+
+      let text = await file.text();
+      let bytes = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+
+      let salt = bytes.slice(0, 16);
+      let iv = bytes.slice(16, 28);
+      let ciphertext = bytes.slice(28);
+
+      let keyMaterial = await getKeyMaterial(passphrase);
+      let key = await getKey(keyMaterial, salt, 200000);
+
+      try {
+        let decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+        let dec = new TextDecoder().decode(decrypted);
+        document.getElementById("decryptedOutput").textContent = dec;
+      } catch (e) {
+        alert("Passphrase salah atau data rusak!");
+      }
+    }
+  </script>
 </body>
 </html>
