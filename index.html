@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enkripsi Data Akun</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-5">
 
@@ -96,6 +98,11 @@
       let passphrase = document.getElementById("passphrase").value;
       let iterations = parseInt(document.getElementById("iterations").value);
 
+      if (!service || !username || !password || !passphrase) {
+        Swal.fire("⚠️ Data belum lengkap", "Isi semua field wajib!", "warning");
+        return;
+      }
+
       let data = JSON.stringify({ service, username, password, notes });
       let enc = new TextEncoder();
       let encoded = enc.encode(data);
@@ -115,51 +122,71 @@
       let base64 = btoa(String.fromCharCode(...merged));
       lastEncrypted = base64;
       document.getElementById("output").value = base64;
+
+      Swal.fire("✅ Berhasil", "Data berhasil dienkripsi!", "success");
     }
 
     function downloadEncrypted() {
-      if (!lastEncrypted) return alert("Belum ada data terenkripsi!");
+      if (!lastEncrypted) {
+        Swal.fire("⚠️ Tidak ada data", "Enkripsi dulu sebelum download!", "warning");
+        return;
+      }
       download("enkripsidata.txt", lastEncrypted);
+      Swal.fire("📥 Tersimpan", "File berhasil diunduh!", "success");
     }
 
     function copyOutput() {
       let output = document.getElementById("output");
+      if (!output.value) {
+        Swal.fire("⚠️ Kosong", "Tidak ada data untuk disalin!", "warning");
+        return;
+      }
       output.select();
       document.execCommand("copy");
-      alert("Teks disalin ke clipboard!");
+      Swal.fire("📋 Disalin", "Teks berhasil disalin ke clipboard!", "success");
     }
 
     function clearOutput() {
-    if (!confirm("Apakah yakin ingin menghapus semua data?")) return;
+      Swal.fire({
+        title: "Yakin hapus semua data?",
+        text: "Data enkripsi & dekripsi akan hilang!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Reset ENKRIPSI
+          document.getElementById("service").value = "";
+          document.getElementById("username").value = "";
+          document.getElementById("password").value = "";
+          document.getElementById("notes").value = "";
+          document.getElementById("passphrase").value = "";
+          document.getElementById("iterations").value = "200000";
+          document.getElementById("output").value = "";
+          lastEncrypted = "";
 
-    // Reset semua input ENKRIPSI
-    document.getElementById("service").value = "";
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
-    document.getElementById("notes").value = "";
-    document.getElementById("passphrase").value = "";
-    document.getElementById("iterations").value = "200000"; // default lagi
+          // Reset DEKRIPSI
+          document.getElementById("fileInput").value = "";
+          document.getElementById("decryptPassphrase").value = "";
+          document.getElementById("manualInput").value = "";
+          document.getElementById("manualPassphrase").value = "";
+          document.getElementById("decryptedOutput").textContent = "";
 
-    // Reset output enkripsi
-    document.getElementById("output").value = "";
-    if (typeof lastEncrypted !== "undefined") lastEncrypted = "";
-
-    // Reset semua input DEKRIPSI
-    document.getElementById("fileInput").value = "";
-    document.getElementById("decryptPassphrase").value = "";
-    document.getElementById("manualInput").value = "";
-    document.getElementById("manualPassphrase").value = "";
-    document.getElementById("decryptedOutput").textContent = "";
-
-    // Fokus kembali ke input pertama
-    document.getElementById("service").focus();
-  }
+          document.getElementById("service").focus();
+          Swal.fire("🧹 Bersih", "Semua data berhasil dihapus!", "success");
+        }
+      });
+    }
 
     async function decryptDataFromFile() {
       let file = document.getElementById("fileInput").files[0];
       let passphrase = document.getElementById("decryptPassphrase").value;
-      if (!file) return alert("Pilih file terenkripsi dulu!");
-
+      if (!file) {
+        Swal.fire("⚠️ Pilih File", "Pilih file terenkripsi terlebih dahulu!", "warning");
+        return;
+      }
       let text = await file.text();
       decryptProcess(text, passphrase);
     }
@@ -167,7 +194,10 @@
     async function decryptDataManual() {
       let text = document.getElementById("manualInput").value;
       let passphrase = document.getElementById("manualPassphrase").value;
-      if (!text) return alert("Masukkan teks terenkripsi dulu!");
+      if (!text) {
+        Swal.fire("⚠️ Kosong", "Masukkan teks terenkripsi dulu!", "warning");
+        return;
+      }
       decryptProcess(text, passphrase);
     }
 
@@ -184,8 +214,10 @@
 
         let dec = new TextDecoder().decode(decrypted);
         document.getElementById("decryptedOutput").textContent = dec;
+
+        Swal.fire("✅ Berhasil", "Data berhasil didekripsi!", "success");
       } catch (e) {
-        alert("Passphrase salah atau data rusak!");
+        Swal.fire("❌ Gagal", "Passphrase salah atau data rusak!", "error");
       }
     }
   </script>
