@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enkripsi Data</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-5">
+
+  <div class="w-full max-w-6xl bg-gray-800 rounded-2xl shadow-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- ENKRIPSI -->
+    <div>
+      <h1 class="text-2xl font-bold mb-4 text-center">🔐 Enkripsi Data</h1>
+
+      <div class="space-y-3">
+        <textarea id="freeText" placeholder="Tulis teks bebas di sini..." class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32"></textarea>
+
+        <input id="passphrase" type="password" placeholder="Passphrase (kunci enkripsi)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+        <input id="iterations" type="number" value="200000" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+
+        <div class="flex gap-2">
+          <button onclick="encryptData()" class="bg-blue-500 hover:bg-blue-600 w-1/2 p-2 rounded font-bold">Enkripsi</button>
+          <button onclick="downloadEncrypted()" class="bg-purple-500 hover:bg-purple-600 w-1/2 p-2 rounded font-bold">Download</button>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <h2 class="text-lg font-semibold">Hasil Enkripsi</h2>
+        <textarea id="output" class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32"></textarea>
+        <div class="flex gap-2 mt-2">
+          <button onclick="copyOutput()" class="bg-yellow-500 hover:bg-yellow-600 w-1/2 p-2 rounded font-bold">Copy</button>
+          <button onclick="clearOutput()" class="bg-red-500 hover:bg-red-600 w-1/2 p-2 rounded font-bold">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEKRIPSI -->
+    <div>
+      <h1 class="text-2xl font-bold mb-4 text-center">🔓 Dekripsi Data</h1>
+
+      <!-- Dekripsi via File -->
+      <div class="border-b border-gray-600 pb-4 mb-4">
+        <h2 class="text-lg font-semibold mb-2">Dari File</h2>
+        <input type="file" id="fileInput" class="mb-2 w-full" />
+        <input id="decryptPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2" />
+        <button onclick="decryptDataFromFile()" class="bg-green-500 hover:bg-green-600 w-full p-2 rounded font-bold">Dekripsi dari File</button>
+      </div>
+
+      <!-- Dekripsi via Input Manual -->
+      <div>
+        <h2 class="text-lg font-semibold mb-2">Dari Input Manual</h2>
+        <textarea id="manualInput" placeholder="Paste teks terenkripsi di sini..." class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32 mb-2"></textarea>
+        <input id="manualPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2" />
+        <button onclick="decryptDataManual()" class="bg-green-500 hover:bg-green-600 w-full p-2 rounded font-bold">Dekripsi dari Input</button>
+      </div>
+
+      <pre id="decryptedOutput" class="mt-3 bg-gray-700 p-3 rounded h-32 overflow-auto whitespace-pre-wrap"></pre>
+    </div>
+  </div>
+
+  <script>
+    async function getKeyMaterial(passphrase) {
+      let enc = new TextEncoder();
+      return crypto.subtle.importKey("raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]);
+    }
+
+    async function getKey(keyMaterial, salt, iterations) {
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt", "decrypt"]
+      );
+    }
+
+    function download(filename, text) {
+      let blob = new Blob([text], { type: "text/plain" });
+      let link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    let lastEncrypted = "";
+
+    async function encryptData() {
+      let freeText = document.getElementById("freeText").value;
+      let passphrase = document.getElementById("passphrase").value;
+      let iterations = parseInt(document.getElementById("iterations").value);
+
+      if (!freeText || !passphrase) {
+        Swal.fire("Data belum lengkap", "Isi teks dan passphrase!", "warning");
+        return;
+      }
+
+      let data = freeText;
+      let enc = new TextEncoder();
+      let encoded = enc.encode(data);
+      let salt = crypto.getRandomValues(new Uint8Array(16));
+      let iv = crypto.getRandomValues(new Uint8Array(12));
+
+      let keyMaterial = await getKeyMaterial(passphrase);
+      let key = await getKey(keyMaterial, salt, iterations);
+      let ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+
+      let buff = new Uint8Array(ciphertext);
+      let merged = new Uint8Array(salt.length + iv.length + buff.length);
+      merged.set(salt, 0);
+      merged.set(iv, salt.length);
+      merged.set(buff, salt.length + iv.length);
+
+      let base64 = btoa(String.fromCharCode(...merged));
+      lastEncrypted = base64;
+      document.getElementById("output").value = base64;
+
+      Swal.fire("Berhasil", "Data berhasil dienkripsi!", "success");
+    }
+
+    function downloadEncrypted() {
+      if (!lastEncrypted) {
+        Swal.fire("Tidak ada data", "Enkripsi dulu sebelum download!", "warning");
+        return;
+      }
+      download("enkripsidata.txt", lastEncrypted);
+      Swal.fire("Tersimpan", "File berhasil diunduh!", "success");
+    }
+
+    function copyOutput() {
+      let output = document.getElementById("output");
+      if (!output.value) {
+        Swal.fire("Kosong", "Tidak ada data untuk disalin!", "warning");
+        return;
+      }
+      output.select();
+      document.execCommand("copy");
+      Swal.fire("Disalin", "Teks berhasil disalin ke clipboard!", "success");
+    }
+
+    function clearOutput() {
+      Swal.fire({
+        title: "Yakin hapus semua data?",
+        text: "Data enkripsi & dekripsi akan hilang!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal",
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Reset ENKRIPSI
+          document.getElementById("freeText").value = "";
+          document.getElementById("passphrase").value = "";
+          document.getElementById("iterations").value = "200000";
+          document.getElementById("output").value = "";
+          lastEncrypted = "";
+
+          // Reset DEKRIPSI
+          document.getElementById("fileInput").value = "";
+          document.getElementById("decryptPassphrase").value = "";
+          document.getElementById("manualInput").value = "";
+          document.getElementById("manualPassphrase").value = "";
+          document.getElementById("decryptedOutput").textContent = "";
+
+          document.getElementById("freeText").focus();
+          Swal.fire("🧹 Bersih", "Semua data berhasil dihapus!", "success");
+        }
+      });
+    }
+
+    async function decryptDataFromFile() {
+      let file = document.getElementById("fileInput").files[0];
+      let passphrase = document.getElementById("decryptPassphrase").value;
+      if (!file) {
+        Swal.fire("Pilih File", "Pilih file terenkripsi terlebih dahulu!", "warning");
+        return;
+      }
+      let text = await file.text();
+      decryptProcess(text, passphrase);
+    }
+
+    async function decryptDataManual() {
+      let text = document.getElementById("manualInput").value;
+      let passphrase = document.getElementById("manualPassphrase").value;
+      if (!text) {
+        Swal.fire("Kosong", "Masukkan teks terenkripsi dulu!", "warning");
+        return;
+      }
+      decryptProcess(text, passphrase);
+    }
+
+    async function decryptProcess(text, passphrase) {
+      try {
+        let bytes = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+        let salt = bytes.slice(0, 16);
+        let iv = bytes.slice(16, 28);
+        let ciphertext = bytes.slice(28);
+
+        let keyMaterial = await getKeyMaterial(passphrase);
+        let key = await getKey(keyMaterial, salt, 200000);
+        let decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+
+        let dec = new TextDecoder().decode(decrypted);
+        document.getElementById("decryptedOutput").textContent = dec;
+
+        Swal.fire("Berhasil", "Data berhasil didekripsi!", "success");
+      } catch (e) {
+        Swal.fire("Gagal", "Passphrase salah atau data rusak!", "error");
+      }
+    }
+  </script>
+</body>
+</html>
