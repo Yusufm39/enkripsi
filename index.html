@@ -41,20 +41,25 @@
     <div>
       <h1 class="text-2xl font-bold mb-4 text-center">🔓 Dekripsi Data</h1>
 
-      <!-- Dekripsi via File -->
-      <div class="border-b border-gray-600 pb-4 mb-4">
-        <h2 class="text-lg font-semibold mb-2">Dari File</h2>
+      <!-- Input File -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold mb-2">File Terenkripsi</h2>
         <input type="file" id="fileInput" class="mb-2 w-full" />
-        <input id="decryptPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2" />
-        <button onclick="decryptDataFromFile()" class="bg-green-500 hover:bg-green-600 w-full p-2 rounded font-bold">Dekripsi dari File</button>
       </div>
 
-      <!-- Dekripsi via Input Manual -->
-      <div>
-        <h2 class="text-lg font-semibold mb-2">Dari Input Manual</h2>
-        <textarea id="manualInput" placeholder="Paste teks terenkripsi di sini..." class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32 mb-2"></textarea>
-        <input id="manualPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-2" />
-        <button onclick="decryptDataManual()" class="bg-green-500 hover:bg-green-600 w-full p-2 rounded font-bold">Dekripsi dari Input</button>
+      <!-- Input Manual -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold mb-2">Input Manual</h2>
+        <textarea id="manualInput" placeholder="Paste teks terenkripsi di sini..." class="w-full p-2 rounded bg-gray-700 border border-gray-600 h-32"></textarea>
+      </div>
+
+      <!-- Passphrase -->
+      <input id="manualPassphrase" type="password" placeholder="Passphrase" class="w-full p-2 rounded bg-gray-700 border border-gray-600 mb-3" />
+
+      <!-- Tombol Aksi -->
+      <div class="flex gap-2">
+        <button onclick="decryptDataFromFile()" class="bg-green-500 hover:bg-green-600 w-1/2 p-2 rounded font-bold">Dekripsi dari File</button>
+        <button onclick="decryptDataManual()" class="bg-green-500 hover:bg-green-600 w-1/2 p-2 rounded font-bold">Dekripsi dari Input</button>
       </div>
 
       <pre id="decryptedOutput" class="mt-3 bg-gray-700 p-3 rounded h-32 overflow-auto whitespace-pre-wrap"></pre>
@@ -160,7 +165,6 @@
 
           // Reset DEKRIPSI
           document.getElementById("fileInput").value = "";
-          document.getElementById("decryptPassphrase").value = "";
           document.getElementById("manualInput").value = "";
           document.getElementById("manualPassphrase").value = "";
           document.getElementById("decryptedOutput").textContent = "";
@@ -173,7 +177,7 @@
 
     async function decryptDataFromFile() {
       let file = document.getElementById("fileInput").files[0];
-      let passphrase = document.getElementById("decryptPassphrase").value;
+      let passphrase = document.getElementById("manualPassphrase").value;
       if (!file) {
         Swal.fire("Pilih File", "Pilih file terenkripsi terlebih dahulu!", "warning");
         return;
